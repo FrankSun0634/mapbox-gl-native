@@ -9,6 +9,10 @@ APPID 账号如果关联支付宝支付，会无法升级系统。在 app-store 
 
 # 一定要使用 git clone 方式拉代码
 
+# 国内用户下载依赖包经常失败，修改下载超时
+
+修改 mapbox-gl-native/cmake/mason.make 的 99 行： COMMAND curl --retry 5 -s -f -m 3600 -S -L "${_URL}" -o "${_CACHE_PATH}.tmp"
+
 # ios platform 编译bug：
 执行 ` make iframework BUILDTYPE=Release `，死活提示找不到 toolchan.cmake 文件。
 ```
