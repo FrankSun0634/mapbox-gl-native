@@ -48,13 +48,16 @@ token_idx = 0
 start_l = 0
 start_x = 0
 start_y = 0
-with open("./pbf/break.txt") as f:
-    break_str = f.read()
-    last = break_str.split(',')
-    if len(last) >= 3:
-        start_l = int(last[0])
-        start_x = int(last[1])
-        start_y = int(last[2])
+try:
+    with open("./pbf/break.txt") as f:
+        break_str = f.read()
+        last = break_str.split(',')
+        if len(last) >= 3:
+            start_l = int(last[0])
+            start_x = int(last[1])
+            start_y = int(last[2])
+except Exception:
+    print "break.txt missing"
 
 # 开始工作啦
 for lvl in range(start_l,18):
