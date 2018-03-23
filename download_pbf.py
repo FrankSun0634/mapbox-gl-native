@@ -46,15 +46,15 @@ host = 'https://b.tiles.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-str
 token_idx = 0
 # 上一次停止的地方
 start_l = 0
-start_y = 0
 start_x = 0
+start_y = 0
 with open("./pbf/break.txt") as f:
     break_str = f.read()
     last = break_str.split(',')
     if len(last) >= 3:
         start_l = int(last[0])
-        start_y = int(last[1])
-        start_x = int(last[2])
+        start_x = int(last[1])
+        start_y = int(last[2])
 
 # 开始工作啦
 for lvl in range(start_l,18):
@@ -69,14 +69,14 @@ for lvl in range(start_l,18):
             start_y = 0;
         for y in range(start_y,maxx):
             #6/15/24.vector.pbf        
-            path = str(lvl) + '/' + str(y) + '/' + str(x) + '.vector.pbf'
+            path = str(lvl) + '/' + str(x) + '/' + str(y) + '.vector.pbf'
             url_path = host + path + '?access_token=' + token[token_idx]
             while not save_img(url_path, path):
                 token_idx += 1
                 if token_idx >= len(token):
                     filename = "./pbf/break.txt"
                     f = open(filename,'w')
-                    f.write('{},{},{}'.format(l,y,x))
+                    f.write('{},{},{}'.format(lvl,x,y))
                     f.close()
                     os._exit(0)
                 url_path = host + path + '?access_token=' + token[token_idx]
