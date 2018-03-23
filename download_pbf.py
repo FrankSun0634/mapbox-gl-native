@@ -4,6 +4,18 @@ import urllib2
 import math
 import os
 
+# token 池
+token = [
+'pk.eyJ1IjoiZ2FyeWh1IiwiYSI6ImNqZWYwdDF5aDFjODkzM28ycTBvMjM4NWsifQ.JU9SXOvw99tVm7fXxL4MrQ',
+'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA',
+'pk.eyJ1IjoiZmFudmFuemgiLCJhIjoiY2l0ZmRsaHg4MDliNDJvbXk5NXBvdTM2NCJ9.CBkukvDUouPK6DN2gECEJQ',
+'pk.eyJ1IjoienhxaW4yeW91bmciLCJhIjoiY2pmM2xkbHM0MTVveDMxazd6dzB0bHQ3MCJ9.vUo44am_Gu3YH5u-fmLLDw',
+'pk.eyJ1IjoiZXhsaW1pdCIsImEiOiJjamV4dGZwcTkwN2VpMzNsbmozbTlicDliIn0.JJEnXHsW-4QalDXMNfKdzw'
+]
+# 主服务地址
+host = 'https://b.tiles.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/'
+
+
 def save_img(img_url,file_name,file_path='./pbf'):
     #保存图片到磁盘文件夹 file_path中，默认为当前脚本运行目录下的 book\img文件夹
     try:
@@ -33,53 +45,48 @@ def save_img(img_url,file_name,file_path='./pbf'):
         print '错误 ：',e
         return False
     return True
-# token 池
-token = [
-'pk.eyJ1IjoiZ2FyeWh1IiwiYSI6ImNqZWYwdDF5aDFjODkzM28ycTBvMjM4NWsifQ.JU9SXOvw99tVm7fXxL4MrQ',
-'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA',
-'pk.eyJ1IjoiZmFudmFuemgiLCJhIjoiY2l0ZmRsaHg4MDliNDJvbXk5NXBvdTM2NCJ9.CBkukvDUouPK6DN2gECEJQ',
-'pk.eyJ1IjoienhxaW4yeW91bmciLCJhIjoiY2pmM2xkbHM0MTVveDMxazd6dzB0bHQ3MCJ9.vUo44am_Gu3YH5u-fmLLDw',
-'pk.eyJ1IjoiZXhsaW1pdCIsImEiOiJjamV4dGZwcTkwN2VpMzNsbmozbTlicDliIn0.JJEnXHsW-4QalDXMNfKdzw'
-]
-# 主服务地址
-host = 'https://b.tiles.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/'
-token_idx = 0
-# 上一次停止的地方
-start_l = 0
-start_x = 0
-start_y = 0
-try:
-    with open("./pbf/break.txt") as f:
-        break_str = f.read()
-        last = break_str.split(',')
-        if len(last) >= 3:
-            start_l = int(last[0])
-            start_x = int(last[1])
-            start_y = int(last[2])
-except Exception:
-    print "break.txt missing"
+    
+def spider():
+    token_idx = 0
+    # 上一次停止的地方
+    start_l = 0
+    start_x = 0
+    start_y = 0
+    try:
+        with open("./pbf/break.txt") as f:
+            break_str = f.read()
+            last = break_str.split(',')
+            if len(last) >= 3:
+                start_l = int(last[0])
+                start_x = int(last[1])
+                start_y = int(last[2])
+    except Exception:
+        print "break.txt missing"
 
-# 开始工作啦
-for lvl in range(start_l,18):
-    # 如果过了断开的那一层，恢复 xy
-    if lvl > start_l: 
-        start_x = 0
-        start_y = 0
-    maxx = int(math.pow(2,lvl))
-    for x in range(start_x,maxx):
-        # 如果过了断开的那一列，恢复y
-        if x > start_x: 
-            start_y = 0;
-        for y in range(start_y,maxx):
-            #6/15/24.vector.pbf        
-            path = str(lvl) + '/' + str(x) + '/' + str(y) + '.vector.pbf'
-            url_path = host + path + '?access_token=' + token[token_idx]
-            while not save_img(url_path, path):
-                token_idx += 1
-                if token_idx >= len(token):
-                    filename = "./pbf/break.txt"
-                    f = open(filename,'w')
-                    f.write('{},{},{}'.format(lvl,x,y))
-                    f.close()
-                    os._exit(0)
+    # 开始工作啦
+    for lvl in range(start_l,18):
+        # 如果过了断开的那一层，恢复 xy
+        if lvl > start_l: 
+            start_x = 0
+            start_y = 0
+        maxx = int(math.pow(2,lvl))
+        for x in range(start_x,maxx):
+            # 如果过了断开的那一列，恢复y
+            if x > start_x: 
+                start_y = 0;
+            for y in range(start_y,maxx):
+                #6/15/24.vector.pbf        
+                path = str(lvl) + '/' + str(x) + '/' + str(y) + '.vector.pbf'
                 url_path = host + path + '?access_token=' + token[token_idx]
+                while not save_img(url_path, path):
+                    token_idx += 1
+                    if token_idx >= len(token):
+                        filename = "./pbf/break.txt"
+                        f = open(filename,'w')
+                        f.write('{},{},{}'.format(lvl,x,y))
+                        f.close()
+                        return
+                    url_path = host + path + '?access_token=' + token[token_idx]
+
+while True:
+    spider()
