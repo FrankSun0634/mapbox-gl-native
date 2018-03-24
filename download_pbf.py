@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+from multiprocessing import Process
 import urllib2
 import math
 import sys
@@ -100,12 +101,20 @@ def spider(l0,x0,y0):
                         return
                     url_path = host + path + '?access_token=' + token[token_idx]
 
+def loop_down(l,x,y):
+    while True:
+        spider(l,x,y)
+
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print "please input : down.py l x y"
         sys.exit(0)
-    l = int(sys.argv[1])
-    x = int(sys.argv[2])
-    y = int(sys.argv[3])
-    while True:
-        spider(l,x,y)
+    l0 = int(sys.argv[1])
+    x0 = int(sys.argv[2])
+    y0 = int(sys.argv[3])
+    for x in range(x0, x0 + 5):
+        for y in range(y0, y0 + 5):
+            p = Process(target=loop_down, args=(l0,x,y))
+            p.start()
+            #p.join() #串行
+
