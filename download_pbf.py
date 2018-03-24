@@ -2,7 +2,9 @@
 # -*- encoding: utf-8 -*-
 import urllib2
 import math
+import sys
 import os
+
 
 # token 池
 token = [
@@ -46,14 +48,20 @@ def save_img(img_url,file_name,file_path='./pbf'):
         return False
     return True
     
-def spider():
+def spider(l0,x0,y0):
     token_idx = 0
     # 上一次停止的地方
-    start_l = 0
+    width   = pow(2.0, l0)
+    x_min   = x0 / width
+    x_max   = (x0 + 1) / width
+    y_min   = y0 / width
+    y_max   = (y0 + 1) / width
+    start_l = l0
     start_x = 0
     start_y = 0
     try:
-        with open("./pbf/break.txt") as f:
+        filename = './pbf/break-{}_{}_{}.txt'.format(l0,x0,y0)
+        with open(filename) as f:
             break_str = f.read()
             last = break_str.split(',')
             if len(last) >= 3:
@@ -61,32 +69,43 @@ def spider():
                 start_x = int(last[1])
                 start_y = int(last[2])
     except Exception:
-        print "break.txt missing"
+        print filename + " missing"
 
     # 开始工作啦
     for lvl in range(start_l,18):
         # 如果过了断开的那一层，恢复 xy
+        width = int(math.pow(2,lvl))
+        minx = int(x_min * width)
+        maxx = int(x_max * width)
+        miny = int(y_min * width)
+        maxy = int(y_max * width)
         if lvl > start_l: 
-            start_x = 0
-            start_y = 0
-        maxx = int(math.pow(2,lvl))
-        for x in range(start_x,maxx):
+            start_x = minx
+            start_y = miny
+        for x in range(minx,maxx):
             # 如果过了断开的那一列，恢复y
             if x > start_x: 
-                start_y = 0;
-            for y in range(start_y,maxx):
+                start_y = miny;
+            for y in range(miny,maxy):
                 #6/15/24.vector.pbf        
                 path = str(lvl) + '/' + str(x) + '/' + str(y) + '.vector.pbf'
                 url_path = host + path + '?access_token=' + token[token_idx]
                 while not save_img(url_path, path):
                     token_idx += 1
                     if token_idx >= len(token):
-                        filename = "./pbf/break.txt"
+                        filename = './pbf/break-{}_{}_{}.txt'.format(l0,x0,y0)
                         f = open(filename,'w')
                         f.write('{},{},{}'.format(lvl,x,y))
                         f.close()
                         return
                     url_path = host + path + '?access_token=' + token[token_idx]
 
-while True:
-    spider()
+if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print "please input : down.py l x y"
+        sys.exit(0)
+    l = int(sys.argv[1])
+    x = int(sys.argv[2])
+    y = int(sys.argv[3])
+    while True:
+        spider(l,x,y)
