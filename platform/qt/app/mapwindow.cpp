@@ -432,6 +432,11 @@ void MapWindow::initializeGL()
         setWindowTitle(QString("Mapbox GL: ") + styleUrl);
     }
 
+    QString styleUrl = qgetenv("MAPBOX_BASE_URL");
+	if (!styleUrl.isEmpty()) {
+		settings.setApiBaseUrl(styleUrl);
+	}
+    
     m_bearingAnimation = new QPropertyAnimation(m_map.data(), "bearing");
     m_zoomAnimation = new QPropertyAnimation(m_map.data(), "zoom");
 
